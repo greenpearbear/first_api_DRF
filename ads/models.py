@@ -58,7 +58,7 @@ class Announcement(models.Model):
     price = models.IntegerField(default=0)
     description = models.CharField(max_length=1000)
     is_published = models.CharField(max_length=5)
-    image = models.ImageField()
+    image = models.ImageField(upload_to='images/')
     category = models.ForeignKey(Categories, on_delete=models.CASCADE)
 
     class Meta:

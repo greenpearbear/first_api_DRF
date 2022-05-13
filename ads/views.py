@@ -28,7 +28,7 @@ class AnnouncementsPOSTView(CreateView):
             price=announcement_data["price"],
             description=announcement_data["description"],
             is_published=announcement_data["is_published"],
-            image=announcement_data["image"],
+            image=request.FILES["image"],
             author_id=announcement_data["author_id"],
             category_id=announcement_data["category_id"]
         )
@@ -40,7 +40,7 @@ class AnnouncementsPOSTView(CreateView):
             'price': announcement.price,
             'description': announcement.description,
             'is_published': announcement.is_published,
-            'image': announcement.image,
+            'image': announcement.image.url,
             'category_id': announcement.category_id
 
         })
@@ -59,9 +59,13 @@ class AnnouncementsGETView(ListView):
         for announcement in self.object_list:
             response.append({
                 'id': announcement.pk,
-                "name": announcement.name,
-                'author': announcement.author,
-                'price': announcement.price
+                'name': announcement.name,
+                'author_id': announcement.author_id,
+                'price': announcement.price,
+                'description': announcement.description,
+                'is_published': announcement.is_published,
+                'image': announcement.image.url,
+                'category_id': announcement.category_id
             })
 
         return JsonResponse(response, safe=False)
@@ -76,12 +80,13 @@ class AnnouncementsViewDetail(DetailView):
 
         return JsonResponse({
             'id': announcement.pk,
-            "name": announcement.name,
-            'author': announcement.author,
+            'name': announcement.name,
+            'author_id': announcement.author_id,
             'price': announcement.price,
             'description': announcement.description,
-            'address': announcement.address,
-            'is_published': announcement.is_published
+            'is_published': announcement.is_published,
+            'image': announcement.image.url,
+            'category_id': announcement.category_id
         })
 
 
@@ -100,7 +105,7 @@ class AnnouncementsViewUpdate(CreateView):
         self.object.name = announcement_data["name"]
         self.object.price = announcement_data["price"]
         self.object.description = announcement_data["description"]
-        self.object.image = announcement_data["image"]
+        self.object.image = request.FILES["image"]
         self.object.category_id = announcement_data["category_id"]
 
         try:
@@ -117,7 +122,7 @@ class AnnouncementsViewUpdate(CreateView):
             'price': self.object.price,
             'description': self.object.description,
             'is_published': self.object.is_published,
-            'image': self.object.image,
+            'image': self.object.image.url,
             'category_id': self.object.category_id
         })
 
