@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import DetailView, CreateView, ListView, DeleteView
+from django.views.generic import DetailView, CreateView, ListView, DeleteView, UpdateView
 
 from ads.models import Categories, Announcement
 
@@ -15,12 +15,10 @@ def index(request):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AnnouncementsPOSTView(CreateView):
-
     model = Announcement
     fields = ['name', 'price', 'description', 'is_published', 'image', 'author_id', 'category_id']
 
     def post(self, request, *args, **kwargs):
-
         announcement_data = json.loads(request.body)
 
         announcement = Announcement.objects.create(
@@ -48,7 +46,6 @@ class AnnouncementsPOSTView(CreateView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AnnouncementsGETView(ListView):
-
     model = Announcement
 
     def get(self, request, *args, **kwargs):
@@ -91,8 +88,7 @@ class AnnouncementsViewDetail(DetailView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsViewUpdate(CreateView):
-
+class AnnouncementsViewUpdate(UpdateView):
     model = Announcement
     fields = ['name', 'price', 'description', 'is_published', 'image', 'author_id', 'category_id']
 
@@ -129,7 +125,6 @@ class AnnouncementsViewUpdate(CreateView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AnnouncementsViewDelete(DeleteView):
-
     model = Announcement
     success_url = '/'
 
@@ -141,7 +136,6 @@ class AnnouncementsViewDelete(DeleteView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CategoriesPOSTView(CreateView):
-
     model = Categories
     fields = ['name']
 
@@ -160,7 +154,6 @@ class CategoriesPOSTView(CreateView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CategoriesGETView(ListView):
-
     model = Categories
 
     def get(self, request, *args, **kwargs):
@@ -191,7 +184,7 @@ class CategoriesViewDetail(DetailView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class CategoriesViewUpdate(CreateView):
+class CategoriesViewUpdate(UpdateView):
     model = Categories
     fields = ['name']
 
@@ -218,7 +211,6 @@ class CategoriesViewUpdate(CreateView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CategoriesViewDelete(DeleteView):
-
     model = Categories
     success_url = '/'
 
@@ -227,3 +219,29 @@ class CategoriesViewDelete(DeleteView):
 
         return JsonResponse({"status": "ok"}, status=200)
 
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ImageToAd(UpdateView):
+    model = Announcement
+    fields = ['name', 'price', 'description', 'is_published', 'image', 'author_id', 'category_id']
+
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.object = None
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        self.object.image = request.FILES['image']
+        self.object.save()
+
+        return JsonResponse({
+            'id': self.object.pk,
+            'name': self.object.name,
+            'author_id': self.object.author_id,
+            'price': self.object.price,
+            'description': self.object.description,
+            'is_published': self.object.is_published,
+            'image': self.object.image.url,
+            'category_id': self.object.category_id
+        })
