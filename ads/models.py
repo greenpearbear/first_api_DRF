@@ -17,7 +17,7 @@ class Location(models.Model):
 
     name = models.CharField(max_length=100)
     lat = models.FloatField()
-    Ing = models.FloatField()
+    lng = models.FloatField()
 
     class Meta:
         verbose_name = 'Локация'
