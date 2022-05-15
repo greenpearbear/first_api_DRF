@@ -53,6 +53,8 @@ class AnnouncementsGETView(ListView):
 
         response = []
 
+        self.object_list = self.object_list.order_by('-price')
+
         for announcement in self.object_list:
             response.append({
                 'id': announcement.pk,
@@ -160,6 +162,8 @@ class CategoriesGETView(ListView):
         super().get(self, request, *args, **kwargs)
 
         response = []
+
+        self.object_list = self.object_list.order_by('name')
 
         for categories in self.object_list:
             response.append({

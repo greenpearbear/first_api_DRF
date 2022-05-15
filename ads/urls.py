@@ -1,8 +1,10 @@
+from django.contrib import admin
 from django.urls import path
 from . import views
 
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('', views.index, name='index'),
     path('cat/', views.CategoriesGETView.as_view(), name='GET_list_cat'),
     path('cat/create/', views.CategoriesPOSTView.as_view(), name='POST_cat'),
