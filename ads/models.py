@@ -41,7 +41,7 @@ class Author(models.Model):
     password = models.CharField(max_length=20)
     role = models.CharField(max_length=9, default='member', choices=ROLE)
     age = models.IntegerField()
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    location = models.ManyToManyField(Location)
 
     class Meta:
         verbose_name = 'Пользователь'

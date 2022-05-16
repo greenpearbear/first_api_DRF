@@ -1,12 +1,14 @@
 import json
 
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, CreateView, ListView, DeleteView, UpdateView
 
 from ads.models import Categories, Announcement
+from my_project import settings
 
 
 def index(request):
@@ -48,15 +50,19 @@ class AnnouncementsPOSTView(CreateView):
 class AnnouncementsGETView(ListView):
     model = Announcement
 
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.object_list = None
+
     def get(self, request, *args, **kwargs):
         super().get(self, request, *args, **kwargs)
 
-        response = []
+        announcement = []
 
         self.object_list = self.object_list.order_by('-price')
 
         for announcement in self.object_list:
-            response.append({
+            announcement.append({
                 'id': announcement.pk,
                 'name': announcement.name,
                 'author_id': announcement.author_id,
@@ -66,6 +72,16 @@ class AnnouncementsGETView(ListView):
                 'image': announcement.image.url,
                 'category_id': announcement.category_id
             })
+
+        paginator = Paginator(self.object_list, settings.TOTAL_ON_PAGE)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        response = {
+            'items': announcement,
+            'total': paginator.count,
+            'num_pages': paginator.num_pages
+        }
 
         return JsonResponse(response, safe=False)
 
@@ -158,6 +174,10 @@ class CategoriesPOSTView(CreateView):
 class CategoriesGETView(ListView):
     model = Categories
 
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.object_list = None
+
     def get(self, request, *args, **kwargs):
         super().get(self, request, *args, **kwargs)
 
@@ -249,3 +269,6 @@ class ImageToAd(UpdateView):
             'image': self.object.image.url,
             'category_id': self.object.category_id
         })
+
+
+
