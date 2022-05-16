@@ -12,13 +12,9 @@ def fixtures_create(json_file_path):
     for json_data in json_array:
         json_array_new.append({
             "id": json_data["id"],
-            "first_name": json_data["first_name"],
-            "last_name": json_data["last_name"],
-            "username": json_data["username"],
-            "password": json_data["password"],
-            "role": json_data["role"],
-            "age": json_data["age"],
-            "location_id": json_data["location_id"],
+            "name": json_data["name"],
+            "lat": json_data["lat"],
+            "lng": json_data["lng"],
         })
 
     json_fixture = []
@@ -26,13 +22,13 @@ def fixtures_create(json_file_path):
 
     for json_data in json_array_new:
         json_fixture.append({
-            "model": "ads.author",
+            "model": "user.location",
             "pk": i,
             "fields": json_data
         })
 
-    with open('user_fixture.json', 'w', encoding='utf-8') as jsonf:
+    with open('location_fixture.json', 'w', encoding='utf-8') as jsonf:
         json.dump(json_fixture, jsonf, indent=4)
 
 
-fixtures_create(r'USER.json')
+fixtures_create(r'LOCATION.json')

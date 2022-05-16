@@ -1,5 +1,7 @@
 from django.db import models
 
+import user.models
+
 
 class Categories(models.Model):
 
@@ -13,49 +15,10 @@ class Categories(models.Model):
         return self.name
 
 
-class Location(models.Model):
-
-    name = models.CharField(max_length=100)
-    lat = models.FloatField()
-    lng = models.FloatField()
-
-    class Meta:
-        verbose_name = 'Локация'
-        verbose_name_plural = 'Локации'
-
-    def __str__(self):
-        return self.name
-
-
-class Author(models.Model):
-
-    ROLE = [
-        ("member", "Пользователь"),
-        ("moderator", "Модератор"),
-        ("admin", "Админ"),
-    ]
-
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
-    username = models.CharField(max_length=30)
-    password = models.CharField(max_length=20)
-    role = models.CharField(max_length=9, default='member', choices=ROLE)
-    age = models.IntegerField()
-    location = models.ManyToManyField(Location)
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-        ordering = ['username']
-
-    def __str__(self):
-        return self.username
-
-
 class Announcement(models.Model):
 
     name = models.CharField(max_length=50)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    author = models.ForeignKey(user.models.Author, on_delete=models.CASCADE)
     price = models.IntegerField(default=0)
     description = models.CharField(max_length=1000)
     is_published = models.CharField(max_length=5)
@@ -68,7 +31,3 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.name
-
-
-
-
