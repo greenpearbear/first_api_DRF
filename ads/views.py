@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, CreateView, ListView, DeleteView, UpdateView
 
-from ads.models import Categories, Announcement
+from ads.models import Categories, Announcement, Author
 from my_project import settings
 
 
@@ -16,7 +16,7 @@ def index(request):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsPOSTView(CreateView):
+class AnnouncementsCreateView(CreateView):
     model = Announcement
     fields = ['name', 'price', 'description', 'is_published', 'image', 'author_id', 'category_id']
 
@@ -47,7 +47,7 @@ class AnnouncementsPOSTView(CreateView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsGETView(ListView):
+class AnnouncementsListView(ListView):
     model = Announcement
 
     def __init__(self, **kwargs):
@@ -57,12 +57,15 @@ class AnnouncementsGETView(ListView):
     def get(self, request, *args, **kwargs):
         super().get(self, request, *args, **kwargs)
 
-        announcement = []
-
         self.object_list = self.object_list.order_by('-price')
 
-        for announcement in self.object_list:
-            announcement.append({
+        paginator = Paginator(self.object_list, settings.TOTAL_ON_PAGE)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        announcements = []
+        for announcement in page_obj:
+            announcements.append({
                 'id': announcement.pk,
                 'name': announcement.name,
                 'author_id': announcement.author_id,
@@ -73,12 +76,8 @@ class AnnouncementsGETView(ListView):
                 'category_id': announcement.category_id
             })
 
-        paginator = Paginator(self.object_list, settings.TOTAL_ON_PAGE)
-        page_number = request.GET.get("page")
-        page_obj = paginator.get_page(page_number)
-
         response = {
-            'items': announcement,
+            'items': announcements,
             'total': paginator.count,
             'num_pages': paginator.num_pages
         }
@@ -87,7 +86,7 @@ class AnnouncementsGETView(ListView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsViewDetail(DetailView):
+class AnnouncementsDetailView(DetailView):
     model = Announcement
 
     def get(self, request, *args, **kwargs):
@@ -106,7 +105,7 @@ class AnnouncementsViewDetail(DetailView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsViewUpdate(UpdateView):
+class AnnouncementsUpdateView(UpdateView):
     model = Announcement
     fields = ['name', 'price', 'description', 'is_published', 'image', 'author_id', 'category_id']
 
@@ -142,7 +141,7 @@ class AnnouncementsViewUpdate(UpdateView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsViewDelete(DeleteView):
+class AnnouncementsDeleteView(DeleteView):
     model = Announcement
     success_url = '/'
 
@@ -153,7 +152,7 @@ class AnnouncementsViewDelete(DeleteView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class CategoriesPOSTView(CreateView):
+class CategoriesCreateView(CreateView):
     model = Categories
     fields = ['name']
 
@@ -171,7 +170,7 @@ class CategoriesPOSTView(CreateView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class CategoriesGETView(ListView):
+class CategoriesListView(ListView):
     model = Categories
 
     def __init__(self, **kwargs):
@@ -195,7 +194,7 @@ class CategoriesGETView(ListView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class CategoriesViewDetail(DetailView):
+class CategoriesDetailView(DetailView):
     model = Categories
 
     def get(self, request, *args, **kwargs):
@@ -208,7 +207,7 @@ class CategoriesViewDetail(DetailView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class CategoriesViewUpdate(UpdateView):
+class CategoriesUpdateView(UpdateView):
     model = Categories
     fields = ['name']
 
@@ -234,7 +233,7 @@ class CategoriesViewUpdate(UpdateView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class CategoriesViewDelete(DeleteView):
+class CategoriesDeleteView(DeleteView):
     model = Categories
     success_url = '/'
 
@@ -271,4 +270,144 @@ class ImageToAd(UpdateView):
         })
 
 
+@method_decorator(csrf_exempt, name='dispatch')
+class UserListView(ListView):
 
+    model = Author
+
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.object_list = None
+
+    def get(self, request, *args, **kwargs):
+        super().get(self, request, *args, **kwargs)
+
+        self.object_list = self.object_list.order_by('username')
+
+        paginator = Paginator(self.object_list, settings.TOTAL_ON_PAGE)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        authors = []
+
+        for author in page_obj:
+            authors.append({
+                'id': author.pk,
+                'first_name': author.first_name,
+                'last_name': author.last_name,
+                'username': author.username,
+                'password': author.password,
+                'role': author.role,
+                'age': author.age,
+                'location': list(self.object.location.all().values_list('name', flat=True))
+            })
+
+        response = {
+            'items': authors,
+            'total': paginator.count,
+            'num_pages': paginator.num_pages
+        }
+
+        return JsonResponse(response, safe=False)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserViewDetail(DetailView):
+
+    model = Author
+
+    def get(self, request, *args, **kwargs):
+
+        author = self.get_object()
+
+        return JsonResponse({
+            'id': author.pk,
+            'first_name': author.first_name,
+            'last_name': author.last_name,
+            'username': author.username,
+            'password': author.password,
+            'role': author.role,
+            'age': author.age,
+            'location': list(self.object.location.all().values_list('name', flat=True))
+        })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserCreateView(CreateView):
+
+    model = Author
+    fields = ['first_name', 'last_name', 'username', 'password', 'role', 'age', 'location']
+
+    def post(self, request, *args, **kwargs):
+
+        user_data = json.loads(request.body)
+
+        author = Author.objects.create(
+            first_name=user_data['first_name'],
+            last_name=user_data['last_name'],
+            username=user_data['username'],
+            password=user_data['password'],
+            role=user_data['role'],
+            age=user_data['age'],
+            location=user_data['location']
+        )
+
+        return JsonResponse({
+            'id': author.pk,
+            'first_name': author.first_name,
+            'last_name': author.last_name,
+            'username': author.username,
+            'password': author.password,
+            'role': author.role,
+            'age': author.age,
+            'location': list(self.object.location.all().values_list('name', flat=True))
+        })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserUpdateView(UpdateView):
+
+    model = Author
+    fields = ['first_name', 'last_name', 'username', 'password', 'role', 'age', 'location']
+
+    def post(self, request, *args, **kwargs):
+
+        super().post(self, request, *args, **kwargs)
+        user_data = json.loads(request.body)
+
+        self.object.first_name = user_data['first_name']
+        self.object.last_name = user_data['last_name']
+        self.object.username = user_data['username']
+        self.object.password = user_data['password']
+        self.object.role = user_data['role']
+        self.object.age = user_data['age']
+        self.object.location = user_data['location']
+
+        try:
+            self.object.full_clean()
+        except ValidationError as e:
+            return JsonResponse(e.message_dict, status=422)
+
+        self.object.save()
+
+        return JsonResponse({
+            'id': self.object.pk,
+            'first_name': self.object.first_name,
+            'last_name': self.object.last_name,
+            'username': self.object.username,
+            'password': self.object.password,
+            'role': self.object.role,
+            'age': self.object.age,
+            'location': list(self.object.location.all().values_list('name', flat=True))
+        })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserDeleteView(DeleteView):
+
+    model = Author
+
+    def delete(self, request, *args, **kwargs):
+        super().delete(request, *args, **kwargs)
+
+        return JsonResponse({"status": "ok"}, status=200)
