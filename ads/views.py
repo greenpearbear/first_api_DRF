@@ -2,6 +2,7 @@ import json
 
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.db.models import Count
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -49,10 +50,6 @@ class AnnouncementsCreateView(CreateView):
 @method_decorator(csrf_exempt, name='dispatch')
 class AnnouncementsListView(ListView):
     model = Announcement
-
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object_list = None
 
     def get(self, request, *args, **kwargs):
         super().get(self, request, *args, **kwargs)
@@ -173,10 +170,6 @@ class CategoriesCreateView(CreateView):
 class CategoriesListView(ListView):
     model = Categories
 
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object_list = None
-
     def get(self, request, *args, **kwargs):
         super().get(self, request, *args, **kwargs)
 
@@ -248,10 +241,6 @@ class ImageToAd(UpdateView):
     model = Announcement
     fields = ['name', 'price', 'description', 'is_published', 'image', 'author_id', 'category_id']
 
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object = None
-
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
 
@@ -272,17 +261,10 @@ class ImageToAd(UpdateView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserListView(ListView):
-
     model = Author
-
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object_list = None
 
     def get(self, request, *args, **kwargs):
         super().get(self, request, *args, **kwargs)
-
-        self.object_list = self.object_list.order_by('username')
 
         paginator = Paginator(self.object_list, settings.TOTAL_ON_PAGE)
         page_number = request.GET.get('page')
@@ -312,12 +294,10 @@ class UserListView(ListView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class UserViewDetail(DetailView):
-
+class UserDetailView(DetailView):
     model = Author
 
     def get(self, request, *args, **kwargs):
-
         author = self.get_object()
 
         return JsonResponse({
@@ -334,12 +314,10 @@ class UserViewDetail(DetailView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserCreateView(CreateView):
-
     model = Author
     fields = ['first_name', 'last_name', 'username', 'password', 'role', 'age', 'location']
 
     def post(self, request, *args, **kwargs):
-
         user_data = json.loads(request.body)
 
         author = Author.objects.create(
@@ -366,7 +344,6 @@ class UserCreateView(CreateView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserUpdateView(UpdateView):
-
     model = Author
     fields = ['first_name', 'last_name', 'username', 'password', 'role', 'age', 'location']
 
@@ -404,10 +381,49 @@ class UserUpdateView(UpdateView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserDeleteView(DeleteView):
-
     model = Author
+    success_url = '/'
 
     def delete(self, request, *args, **kwargs):
         super().delete(request, *args, **kwargs)
 
         return JsonResponse({"status": "ok"}, status=200)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserPublishedView(ListView):
+
+    model = Author
+    queryset = Author.objects.all()
+
+    def get(self, request, *args, **kwargs):
+
+        super().get(self, request, *args, **kwargs)
+        self.object_list = self.object_list.annotate(total_ads=Count('announcement'))
+
+        paginator = Paginator(self.object_list, settings.TOTAL_ON_PAGE)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        users = []
+
+        for user in page_obj:
+            users.append({
+                'id': user.pk,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'username': user.username,
+                'password': user.password,
+                'role': user.role,
+                'age': user.age,
+                'location': list(map(str, user.location.all())),
+                'total_ads': user.total_ads
+            })
+
+        response = {
+            'items': users,
+            'total': paginator.count,
+            'per_page': paginator.num_pages
+        }
+
+        return JsonResponse(response)
