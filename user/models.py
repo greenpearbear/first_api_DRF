@@ -29,7 +29,7 @@ class Author(models.Model):
     password = models.CharField(max_length=20)
     role = models.CharField(max_length=9, default='member', choices=ROLE)
     age = models.IntegerField()
-    location_id = models.ManyToManyField(Location)
+    locations = models.ManyToManyField(Location)
 
     class Meta:
         verbose_name = 'Пользователь'

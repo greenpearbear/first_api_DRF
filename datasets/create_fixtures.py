@@ -2,7 +2,6 @@ import json
 
 
 def fixtures_create(json_file_path):
-    json_array = []
 
     with open(json_file_path, 'r', encoding='utf-8') as jsonf:
         json_array = json.load(jsonf)
@@ -17,17 +16,17 @@ def fixtures_create(json_file_path):
             "password": json_data["password"],
             "role": json_data["role"],
             "age": json_data["age"],
-            "location_id": json_data["location_id"],
+            "locations": list(map(lambda x: int(x), json_data["location_id"])),
         })
 
     json_fixture = []
     i = 1
 
-    for json_data in json_array_new:
+    for json_data_fix in json_array_new:
         json_fixture.append({
             "model": "user.author",
             "pk": i,
-            "fields": json_data
+            "fields": json_data_fix
         })
         i += 1
 
