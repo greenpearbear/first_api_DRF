@@ -16,7 +16,7 @@ def fixtures_create(json_file_path):
             "password": json_data["password"],
             "role": json_data["role"],
             "age": json_data["age"],
-            "locations": list(map(lambda x: int(x), json_data["location_id"])),
+            "locations": [int(json_data["location_id"])],
         })
 
     json_fixture = []
