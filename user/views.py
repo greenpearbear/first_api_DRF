@@ -61,7 +61,7 @@ class UserPublishedView(ListView):
                 'password': user.password,
                 'role': user.role,
                 'age': user.age,
-                'location': list(map(str, user.location.all())),
+                'locations': list(map(str, user.locations.all())),
                 'total_ads': user.total_ads
             })
 
@@ -72,11 +72,6 @@ class UserPublishedView(ListView):
         }
 
         return JsonResponse(response)
-
-
-class UserPublishedViewAPI(ListAPIView):
-    queryset = Author.objects.filter()
-    serializer_class = AuthorSerializer
 
 
 class LocationViewSet(ModelViewSet):

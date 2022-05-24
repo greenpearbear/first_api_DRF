@@ -11,9 +11,6 @@ class LocationSerializer(serializers.ModelSerializer):
 class AuthorSerializer(serializers.ModelSerializer):
     locations = LocationSerializer(many=True)
 
-
     class Meta:
         model = Author
         fields = "__all__"
-
-
