@@ -20,13 +20,17 @@ from django.urls import path, include
 
 import ads.views
 from my_project import settings
+from user.urls import router
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api-auth/', include('rest_framework.urls')),
     path('', ads.views.index, name='index'),
     path('ads/', include('ads.urls')),
     path('user/', include('user.urls')),
 ]
+
+urlpatterns += router.urls
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

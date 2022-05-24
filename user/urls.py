@@ -1,5 +1,11 @@
 from django.urls import path
+from rest_framework import routers
+
 from . import views
+from .views import LocationViewSet
+
+router = routers.SimpleRouter()
+router.register('location', LocationViewSet)
 
 urlpatterns = [
 
@@ -10,3 +16,5 @@ urlpatterns = [
     path('<int:pk>/delete', views.UserDeleteView.as_view(), name='delete_user'),
     path('Z/', views.UserPublishedView.as_view(), name='get_list_user_published_true'),
 ]
+
+

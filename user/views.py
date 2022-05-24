@@ -7,9 +7,11 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from rest_framework.viewsets import ModelViewSet
 
 from my_project import settings
-from user.models import Author
+from .models import Author, Location
+from .serializers import LocationSerializer
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -180,3 +182,8 @@ class UserPublishedView(ListView):
         }
 
         return JsonResponse(response)
+
+
+class LocationViewSet(ModelViewSet):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
