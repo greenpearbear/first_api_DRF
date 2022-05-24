@@ -1,150 +1,64 @@
 import json
 
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, CreateView, ListView, DeleteView, UpdateView
-
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from ads.models import Categories, Announcement
-from my_project import settings
+from .serializers import  AnnouncementSerializer
 
 
 def index(request):
     return JsonResponse({"status": "ok"}, status=200)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsCreateView(CreateView):
-    model = Announcement
-    fields = ['name', 'price', 'description', 'is_published', 'image', 'author_id', 'category_id']
-
-    def post(self, request, *args, **kwargs):
-        announcement_data = json.loads(request.body)
-
-        announcement = Announcement.objects.create(
-            name=announcement_data["name"],
-            price=announcement_data["price"],
-            description=announcement_data["description"],
-            is_published=announcement_data["is_published"],
-            image=request.FILES["image"],
-            author_id=announcement_data["author_id"],
-            category_id=announcement_data["category_id"]
-        )
-
-        return JsonResponse({
-            'id': announcement.pk,
-            'name': announcement.name,
-            'author_id': announcement.author_id,
-            'price': announcement.price,
-            'description': announcement.description,
-            'is_published': announcement.is_published,
-            'image': announcement.image.url,
-            'category_id': announcement.category_id
-
-        })
-
-
-@method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsListView(ListView):
-    model = Announcement
+class AnnouncementListView(ListAPIView):
+    queryset = Announcement.objects.all()
+    serializer_class = AnnouncementSerializer
 
     def get(self, request, *args, **kwargs):
-        super().get(self, request, *args, **kwargs)
 
-        self.object_list = self.object_list.order_by('-price')
+        category = request.GET.get('cat', None)
+        text = request.GET.get('text', None)
+        location = request.GET.get('location', None)
+        price_from = request.GET.get('price_from', None)
+        price_to = request.GET.get('price_to', None)
 
-        paginator = Paginator(self.object_list, settings.TOTAL_ON_PAGE)
-        page_number = request.GET.get("page")
-        page_obj = paginator.get_page(page_number)
+        if category:
+            self.queryset = self.queryset.filter(category_id=category)
 
-        announcements = []
-        for announcement in page_obj:
-            announcements.append({
-                'id': announcement.pk,
-                'name': announcement.name,
-                'author_id': announcement.author_id,
-                'price': announcement.price,
-                'description': announcement.description,
-                'is_published': announcement.is_published,
-                'image': announcement.image.url,
-                'category_id': announcement.category_id
-            })
+        if text:
+            self.queryset = self.queryset.filter(name__icontains=text)
 
-        response = {
-            'items': announcements,
-            'total': paginator.count,
-            'num_pages': paginator.num_pages
-        }
+        if location:
+            self.queryset = self.queryset.filter(author__locations__name__icontains=location)
 
-        return JsonResponse(response, safe=False)
+        if price_to and price_from:
+            self.queryset = self.queryset.filter(price__lte=price_to).filter(price__gte=price_from)
+
+        return super().get(self, request, *args, **kwargs)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsDetailView(DetailView):
-    model = Announcement
-
-    def get(self, request, *args, **kwargs):
-        announcement = self.get_object()
-
-        return JsonResponse({
-            'id': announcement.pk,
-            'name': announcement.name,
-            'author_id': announcement.author_id,
-            'price': announcement.price,
-            'description': announcement.description,
-            'is_published': announcement.is_published,
-            'image': announcement.image.url,
-            'category_id': announcement.category_id
-        })
+class AnnouncementRetrieveView(RetrieveAPIView):
+    queryset = Announcement.objects.all()
+    serializer_class = AnnouncementSerializer
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsUpdateView(UpdateView):
-    model = Announcement
-    fields = ['name', 'price', 'description', 'is_published', 'image', 'author_id', 'category_id']
-
-    def post(self, request, *args, **kwargs):
-
-        super().post(self, request, *args, **kwargs)
-
-        announcement_data = json.loads(request.body)
-
-        self.object.name = announcement_data["name"]
-        self.object.price = announcement_data["price"]
-        self.object.description = announcement_data["description"]
-        self.object.image = request.FILES["image"]
-        self.object.category_id = announcement_data["category_id"]
-
-        try:
-            self.object.full_clean()
-        except ValidationError as e:
-            return JsonResponse(e.message_dict, status=422)
-
-        self.object.save()
-
-        return JsonResponse({
-            'id': self.object.pk,
-            'name': self.object.name,
-            'author_id': self.object.author_id,
-            'price': self.object.price,
-            'description': self.object.description,
-            'is_published': self.object.is_published,
-            'image': self.object.image.url,
-            'category_id': self.object.category_id
-        })
+class AnnouncementCreateView(CreateAPIView):
+    queryset = Announcement.objects.all()
+    serializer_class = AnnouncementSerializer
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class AnnouncementsDeleteView(DeleteView):
-    model = Announcement
-    success_url = '/'
+class AnnouncementUpdateView(UpdateAPIView):
+    queryset = Announcement.objects.all()
+    serializer_class = AnnouncementSerializer
 
-    def delete(self, request, *args, **kwargs):
-        super().delete(request, *args, **kwargs)
 
-        return JsonResponse({'status': 'ok'}, status=200)
+class AnnouncementDestroyView(DestroyAPIView):
+    queryset = Announcement.objects.all()
+    serializer_class = AnnouncementSerializer
 
 
 @method_decorator(csrf_exempt, name='dispatch')
