@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
@@ -15,7 +16,7 @@ class Location(models.Model):
         return self.name
 
 
-class Author(models.Model):
+class Author(AbstractUser):
 
     ROLE = [
         ("member", "Пользователь"),
@@ -25,7 +26,7 @@ class Author(models.Model):
 
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
-    username = models.CharField(max_length=30)
+    username = models.CharField(max_length=30, unique=True)
     password = models.CharField(max_length=20)
     role = models.CharField(max_length=9, default='member', choices=ROLE)
     age = models.IntegerField()

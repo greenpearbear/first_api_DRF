@@ -14,3 +14,11 @@ class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         fields = "__all__"
+
+    def create(self, validated_data):
+        user = Author.objects.create(**validated_data)
+
+        user.set_password(validated_data["password"])
+        user.save()
+
+        return user
