@@ -6,9 +6,10 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, CreateView, ListView, DeleteView, UpdateView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
-from ads.models import Categories, Announcement
-from .serializers import  AnnouncementSerializer
-
+from ads.models import Categories, Announcement, Selection
+from .serializers import AnnouncementSerializer, SelectionSerializer
+from rest_framework.permissions import IsAuthenticated
+from .permission import SelectionPermissions, AdminOrModeratorPermissions
 
 def index(request):
     return JsonResponse({"status": "ok"}, status=200)
@@ -44,6 +45,7 @@ class AnnouncementListView(ListAPIView):
 class AnnouncementRetrieveView(RetrieveAPIView):
     queryset = Announcement.objects.all()
     serializer_class = AnnouncementSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class AnnouncementCreateView(CreateAPIView):
@@ -54,11 +56,13 @@ class AnnouncementCreateView(CreateAPIView):
 class AnnouncementUpdateView(UpdateAPIView):
     queryset = Announcement.objects.all()
     serializer_class = AnnouncementSerializer
+    permission_classes = [IsAuthenticated, AdminOrModeratorPermissions]
 
 
 class AnnouncementDestroyView(DestroyAPIView):
     queryset = Announcement.objects.all()
     serializer_class = AnnouncementSerializer
+    permission_classes = [IsAuthenticated, AdminOrModeratorPermissions]
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -170,3 +174,32 @@ class ImageToAd(UpdateView):
             'image': self.object.image.url,
             'category_id': self.object.category_id
         })
+
+
+class SelectionListView(ListAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionSerializer
+
+
+class SelectionDetailView(RetrieveAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionSerializer
+
+
+class SelectionCreateView(CreateAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionSerializer
+    permission_classes = [IsAuthenticated, SelectionPermissions]
+
+
+class SelectionUpdateView(UpdateAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionSerializer
+    permission_classes = [IsAuthenticated, SelectionPermissions]
+
+
+class SelectionDestroyView(DestroyAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionSerializer
+    permission_classes = [IsAuthenticated, SelectionPermissions]
+

@@ -31,3 +31,10 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Selection(models.Model):
+
+    items = models.ManyToManyField(Announcement)
+    name = models.CharField(max_length=50)
+    owner = models.ForeignKey(user.models.Author, on_delete=models.CASCADE)

@@ -1,4 +1,4 @@
-from .models import Announcement, Categories
+from .models import Announcement, Categories, Selection
 from rest_framework import serializers
 
 
@@ -16,4 +16,10 @@ class AnnouncementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Announcement
+        fields = "__all__"
+
+
+class SelectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Selection
         fields = "__all__"
