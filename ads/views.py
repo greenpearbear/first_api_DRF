@@ -9,7 +9,8 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView,
 from ads.models import Categories, Announcement, Selection
 from .serializers import AnnouncementSerializer, SelectionSerializer
 from rest_framework.permissions import IsAuthenticated
-from .permission import SelectionPermissions, AdminOrModeratorPermissions
+from .permission import CheckUserPermissions, AdminOrModeratorPermissions
+
 
 def index(request):
     return JsonResponse({"status": "ok"}, status=200)
@@ -56,13 +57,13 @@ class AnnouncementCreateView(CreateAPIView):
 class AnnouncementUpdateView(UpdateAPIView):
     queryset = Announcement.objects.all()
     serializer_class = AnnouncementSerializer
-    permission_classes = [IsAuthenticated, AdminOrModeratorPermissions]
+    permission_classes = [IsAuthenticated, AdminOrModeratorPermissions, CheckUserPermissions]
 
 
 class AnnouncementDestroyView(DestroyAPIView):
     queryset = Announcement.objects.all()
     serializer_class = AnnouncementSerializer
-    permission_classes = [IsAuthenticated, AdminOrModeratorPermissions]
+    permission_classes = [IsAuthenticated, AdminOrModeratorPermissions, CheckUserPermissions]
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -189,17 +190,17 @@ class SelectionDetailView(RetrieveAPIView):
 class SelectionCreateView(CreateAPIView):
     queryset = Selection.objects.all()
     serializer_class = SelectionSerializer
-    permission_classes = [IsAuthenticated, SelectionPermissions]
+    permission_classes = [IsAuthenticated]
 
 
 class SelectionUpdateView(UpdateAPIView):
     queryset = Selection.objects.all()
     serializer_class = SelectionSerializer
-    permission_classes = [IsAuthenticated, SelectionPermissions]
+    permission_classes = [IsAuthenticated, CheckUserPermissions]
 
 
 class SelectionDestroyView(DestroyAPIView):
     queryset = Selection.objects.all()
     serializer_class = SelectionSerializer
-    permission_classes = [IsAuthenticated, SelectionPermissions]
+    permission_classes = [IsAuthenticated, CheckUserPermissions]
 
