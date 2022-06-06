@@ -7,7 +7,7 @@ import user.models
 class Categories(models.Model):
 
     name = models.CharField(max_length=25)
-    slug = models.SlugField(unique=True, validators=[MinLengthValidator(5), MaxLengthValidator(10)])
+    slug = models.SlugField(unique=True, validators=[MinLengthValidator(5), MaxLengthValidator(10)], null=True)
 
     class Meta:
         verbose_name = 'Категория'

@@ -31,6 +31,8 @@ class Author(AbstractUser):
     role = models.CharField(max_length=9, default='member', choices=ROLE)
     age = models.IntegerField()
     locations = models.ManyToManyField(Location)
+    birth_date = models.DateField(default=1956-1-31)
+    email = models.EmailField(unique=True)
 
     class Meta:
         verbose_name = 'Пользователь'
