@@ -1,3 +1,4 @@
+from django.core.validators import MinLengthValidator, MaxLengthValidator, MinValueValidator
 from django.db import models
 
 import user.models
@@ -6,6 +7,7 @@ import user.models
 class Categories(models.Model):
 
     name = models.CharField(max_length=25)
+    slug = models.SlugField(unique=True, validators=[MinLengthValidator(5), MaxLengthValidator(10)])
 
     class Meta:
         verbose_name = 'Категория'
@@ -17,10 +19,10 @@ class Categories(models.Model):
 
 class Announcement(models.Model):
 
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, null=False, validators=[MinLengthValidator(10)])
     author = models.ForeignKey(user.models.Author, on_delete=models.CASCADE)
-    price = models.IntegerField(default=0)
-    description = models.CharField(max_length=1000)
+    price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    description = models.CharField(max_length=1000, null=True)
     is_published = models.CharField(max_length=5)
     image = models.ImageField(upload_to='images/')
     category = models.ForeignKey(Categories, on_delete=models.CASCADE)
