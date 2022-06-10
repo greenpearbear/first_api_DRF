@@ -12,7 +12,7 @@ class LocationSerializer(serializers.ModelSerializer):
 class AuthorSerializer(serializers.ModelSerializer):
     locations = LocationSerializer(many=True)
     birth_date = serializers.DateField(validators=[no_children_on_site])
-    email = serializers.EmailField(validators=[no_rambler_on_my_site()])
+    email = serializers.EmailField(validators=[no_rambler_on_my_site])
 
     class Meta:
         model = Author

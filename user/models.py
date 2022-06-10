@@ -24,15 +24,15 @@ class Author(AbstractUser):
         ("admin", "Админ"),
     ]
 
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=30, unique=True)
-    password = models.CharField(max_length=20)
+    password = models.CharField(max_length=500)
     role = models.CharField(max_length=9, default='member', choices=ROLE)
     age = models.IntegerField()
     locations = models.ManyToManyField(Location)
-    birth_date = models.DateField(default=1956-1-31)
-    email = models.EmailField(unique=True)
+    birth_date = models.DateField(null=True, blank=True)
+    email = models.EmailField()
 
     class Meta:
         verbose_name = 'Пользователь'
