@@ -10,10 +10,6 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 
 class AnnouncementSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='name'
-    )
     is_published = serializers.CharField(validators=[no_true_in_published])
 
     class Meta:

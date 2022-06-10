@@ -1,7 +1,6 @@
 from django.urls import path
 from . import views
 
-
 urlpatterns = [
     path('cat/', views.CategoriesListView.as_view(), name='GET_list_cat'),
     path('cat/create/', views.CategoriesCreateView.as_view(), name='POST_cat'),
@@ -14,4 +13,9 @@ urlpatterns = [
     path('cat/<int:pk>/delete/', views.CategoriesDeleteView.as_view(), name='delete_cat'),
     path('ad/<int:pk>/delete/', views.AnnouncementDestroyView.as_view(), name='delete_ad'),
     path('ad/<int:pk>/upload_image/', views.ImageToAd.as_view(), name='upload_image_to_ad'),
+    path('selection/', views.SelectionListView.as_view()),
+    path('selection/create/', views.SelectionCreateView.as_view()),
+    path('selection/<int:pk>', views.SelectionDetailView.as_view()),
+    path('selection/<int:pk>/update/', views.SelectionUpdateView.as_view()),
+    path('selection/<int:pk>/delete/', views.SelectionDestroyView.as_view())
 ]

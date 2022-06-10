@@ -4,11 +4,11 @@ from ads.models import Announcement, Categories
 from user.models import Author
 
 
-class CategoryFactory(factory.django.DjangoModelFactory):
+class CategoriesFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Categories
 
-    slug = factory.Faker("color")
+    slug = factory.Faker("name")
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -23,6 +23,6 @@ class AdFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Announcement
 
-    category = factory.SubFactory(CategoryFactory)
+    category = factory.SubFactory(CategoriesFactory)
     author = factory.SubFactory(UserFactory)
     price = 10
